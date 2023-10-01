@@ -183,8 +183,17 @@ def main():
 
     index += "\t</body>\n</html>"
     index = index.replace(args.filepath, '')
+
+    css = "td.top_description\n{\n\tvertical-align:top;\n}\n\n"
+    css += "td.bottom_description\n{\n\tvertical-align:bottom;\n}\n\n"
+    css += "img\n{\n\tmax-height:1024;\n\theight:auto;\n}"
+
     output = open(args.filepath + "index.html", "w")
     output.write(index)
+    output.close()
+
+    output = open(args.filepath + "style.css", "w")
+    output.write(css)
     output.close()
 
 
