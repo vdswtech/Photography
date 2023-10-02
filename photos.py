@@ -50,7 +50,9 @@ class IMAGE:
         img = open(self.image_filepath, 'rb')
         tags = exifread.process_file(img)
         for tag in tags.keys():
-            if tag in ('EXIF ExposureTime', 'EXIF FocalLength', 'EXIF RecommendedExposureIndex'):
+            if tag in ('EXIF ExposureTime',
+                       'EXIF FocalLength',
+                       'EXIF RecommendedExposureIndex'):
                 self.exif[tag] = tags[tag]
 
     def get_img_path(self):
@@ -71,7 +73,9 @@ class IMAGE:
         code += "\t<head>\n\t<body>\n"
         code += "\t\t<table>\n"
         code += "\t\t\t<tr>\n"
-        code += "\t\t\t\t<td><img src=\"" + self.image_filepath + "\" /></td>\n"
+        code += "\t\t\t\t<td><img src=\""
+        code += self.image_filepath
+        code += "\" /></td>\n"
         code += "\t\t\t</tr>\n"
         code += "\t\t</table>\n"
         code += "\t</body>\n"
@@ -81,12 +85,17 @@ class IMAGE:
         if self.previous_img is None:
             code += "\t\t\t\t<td align=\"center\">PREV</td>\n"
         else:
-            code += "\t\t\t\t<td align=\"center\"><a href=\"" + self.previous_img + "\">PREV</a></td>\n"
-        code += "\t\t\t\t<td align=\"center\"><a href=\"../index.html\">Home</a></td>\n"
+            code += "\t\t\t\t<td align=\"center\"><a href=\""
+            code += self.previous_img
+            code += "\">PREV</a></td>\n"
+        code += "\t\t\t\t<td align=\"center\">"
+        code += "<a href=\"../index.html\">Home</a></td>\n"
         if self.next_img is None:
             code += "\t\t\t\t<td align=\"center\">NEXT</td>\n"
         else:
-            code += "\t\t\t\t<td align=\"center\"><a href=\"" + self.next_img + "\">NEXT</a></td>\n"
+            code += "\t\t\t\t<td align=\"center\"><a href=\""
+            code += self.next_img
+            code += "\">NEXT</a></td>\n"
         code += "\t\t\t</tr>\n"
         code += "\t\t</table>\n"
         code += "</html>"
@@ -99,17 +108,45 @@ class IMAGE:
     def generate_index_html(self):
         name = self.image_filepath.split('/')[-1]
         if '/' in str(self.exif['EXIF ExposureTime']):
-            return "<a href=\"" + self.webpage_filepath + "\"><img src=\"" + self.thumbnail_filepath + "\" class=\"tumbnail\" /></a><br />" + name + "<br />" + str(self.exif['EXIF ExposureTime']) + " second<br />ISO " + str(self.exif['EXIF RecommendedExposureIndex']) + "<br />" + str(self.exif['EXIF FocalLength']) + "mm"
+            return "<a href=\"" \
+                    + self.webpage_filepath \
+                    + "\"><img src=\"" \
+                    + self.thumbnail_filepath \
+                    + "\" class=\"tumbnail\" /></a><br />" \
+                    + name \
+                    + "<br />" \
+                    + str(self.exif['EXIF ExposureTime']) \
+                    + " second<br />ISO " \
+                    + str(self.exif['EXIF RecommendedExposureIndex']) \
+                    + "<br />" \
+                    + str(self.exif['EXIF FocalLength']) \
+                    + "mm"
         else:
-            return "<a href=\"" + self.webpage_filepath + "\"><img src=\"" + self.thumbnail_filepath + "\" class=\"tumbnail\" /></a><br />" + name + "<br />" + str(self.exif['EXIF ExposureTime']) + " seconds<br />ISO " + str(self.exif['EXIF RecommendedExposureIndex']) + "<br />" + str(self.exif['EXIF FocalLength']) + "mm"
+            return "<a href=\"" \
+                    + self.webpage_filepath \
+                    + "\"><img src=\"" \
+                    + self.thumbnail_filepath \
+                    + "\" class=\"tumbnail\" /></a><br />" \
+                    + name + "<br />" \
+                    + str(self.exif['EXIF ExposureTime']) \
+                    + " seconds<br />ISO " \
+                    + str(self.exif['EXIF RecommendedExposureIndex']) \
+                    + "<br />" \
+                    + str(self.exif['EXIF FocalLength']) \
+                    + "mm"
 
 
 def arguments():
     parser = argparse.ArgumentParser(prog='photos')
 
-    parser.add_argument('filepath', help='Specify the location of the photos')
-    parser.add_argument('-l', '--log', action='store_true', help='Log everything')
-    parser.add_argument('-v', '--verbose', action='store_true', help='Be verbose')
+    parser.add_argument('filepath',
+                        help='Specify the location of the photos')
+    parser.add_argument('-l', '--log',
+                        action='store_true',
+                        help='Log everything')
+    parser.add_argument('-v', '--verbose',
+                        action='store_true',
+                        help='Be verbose')
 
     return parser.parse_args()
 
@@ -128,11 +165,14 @@ def main():
     images = {}
     args = arguments()
 
-    logging.basicConfig(filename="/home/daemoneye/.photo.log", level=logging.INFO)
+    logging.basicConfig(filename="/home/daemoneye/.photo.log",
+                        level=logging.INFO)
 
     for entries in sorted(os.listdir(args.filepath)):
         arr = []
-        if not re.search('css', entries) and not re.search('js', entries) and not re.search('html', entries):
+        if not re.search('css', entries) \
+                and not re.search('js', entries) \
+                and not re.search('html', entries):
             alert(args, "[+] Working on " + entries + " picture.")
             logme(args, "[+] Working on " + entries + " picture.")
             for image in sorted(os.listdir(args.filepath + entries)):
@@ -140,8 +180,16 @@ def main():
                     alert(args, "\t[-] Working on image " + image + ".")
                     logme(args, "[-] Working on image " + image + ".")
                     main = args.filepath + entries + "/" + image
-                    thumb = args.filepath + entries + "/" + image.split('.')[0] + "_thumb." + main.split('.')[1]
-                    web = args.filepath + entries + "/" + image.split('.')[0] + ".html"
+                    thumb = args.filepath
+                    thumb += entries
+                    thumb += "/"
+                    thumb += image.split('.')[0]
+                    thumb += "_thumb."
+                    thumb += main.split('.')[1]
+                    web = args.filepath
+                    web += entries
+                    web += "/" + image.split('.')[0]
+                    web += ".html"
                     img = IMAGE(main, thumb, web)
                     arr.append(img)
                     images[entries] = arr
@@ -164,13 +212,19 @@ def main():
             if element == 0:
                 images[image][element].set_previous(None)
             else:
-                images[image][element].set_previous(images[image][element-1].get_img_path().split('/')[-1])
+                images[image][element].set_previous(images[image][element-1]
+                                                    .get_img_path()
+                                                    .split('/')[-1])
             if element == len(images[image])-1:
                 images[image][element].set_next(None)
             else:
-                images[image][element].set_next(images[image][element+1].get_img_path().split('/')[-1])
+                images[image][element].set_next(images[image][element+1]
+                                                .get_img_path()
+                                                .split('/')[-1])
             images[image][element].generate_html()
-            index += "\t\t\t<td class=\"bottom_description\">" + images[image][element].generate_index_html() + "</td>\n"
+            index += "\t\t\t<td class=\"bottom_description\">"
+            index += images[image][element].generate_index_html()
+            index += "</td>\n"
             if count == 5:
                 index += "\t\t\t</tr>\n"
                 index += "\t\t\t<br />\n"
