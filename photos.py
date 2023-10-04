@@ -23,7 +23,6 @@
 from PIL import Image
 import argparse
 import exifread
-import logging
 import os
 import re
 import sys
@@ -132,24 +131,8 @@ def arguments():
 
     parser.add_argument('filepath',
                         help='Specify the location of the photos')
-    parser.add_argument('-l', '--log',
-                        action='store_true',
-                        help='Log everything')
-    parser.add_argument('-v', '--verbose',
-                        action='store_true',
-                        help='Be verbose')
 
     return parser.parse_args()
-
-
-def logme(args, message):
-    if args.log:
-        logging.info(message)
-
-
-def alert(args, message):
-    if args.verbose:
-        print(message)
 
 
 def write_to_file(filepath, data):
@@ -162,20 +145,13 @@ def main():
     images = {}
     args = arguments()
 
-    logging.basicConfig(filename="/home/daemoneye/.photo.log",
-                        level=logging.INFO)
-
     for entries in sorted(os.listdir(args.filepath)):
         arr = []
         if not re.search('css', entries) \
                 and not re.search('js', entries) \
                 and not re.search('html', entries):
-            alert(args, "[+] Working on " + entries + " picture.")
-            logme(args, "[+] Working on " + entries + " picture.")
             for image in sorted(os.listdir(args.filepath + entries)):
                 if re.search('IMG_[0-9]{4}.jpg', image):
-                    alert(args, "\t[-] Working on image " + image + ".")
-                    logme(args, "[-] Working on image " + image + ".")
                     main = args.filepath + entries + "/" + image
                     thumb = args.filepath
                     thumb += entries
