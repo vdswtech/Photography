@@ -64,23 +64,8 @@ class IMAGE:
     def set_previous(self, previous_photo):
         self.previous_img = previous_photo
 
-    def generate_html(self):
-        title = self.image_filepath.split('/')[-1]
-        code = "<!DOCTYPE html>\n"
-        code += "<html>\n\t<head>\n"
-        code += "\t\t<title>" + title + "</title>\n"
-        code += "\t\t<link rel=\"stylesheet\" href=\"../style.css\">\n"
-        code += "\t<head>\n\t<body>\n"
-        code += "\t\t<table>\n"
-        code += "\t\t\t<tr>\n"
-        code += "\t\t\t\t<td><img src=\""
-        code += self.image_filepath
-        code += "\" /></td>\n"
-        code += "\t\t\t</tr>\n"
-        code += "\t\t</table>\n"
-        code += "\t</body>\n"
-        code += "\t<footer>\n"
-        code += "\t\t<table width=\"100%\" border=\"1\">\n"
+    def nav_menu(self):
+        code = "\t\t<table width=\"100%\" border=\"1\">\n"
         code += "\t\t\t<tr>\n"
         if self.previous_img is None:
             code += "\t\t\t\t<td align=\"center\">PREV</td>\n"
@@ -97,7 +82,26 @@ class IMAGE:
             code += self.next_img
             code += "\">NEXT</a></td>\n"
         code += "\t\t\t</tr>\n"
+        code += "\t\t<table>\n"
+
+        return code
+
+    def generate_html(self):
+        title = self.image_filepath.split('/')[-1]
+        code = "<!DOCTYPE html>\n"
+        code += "<html>\n\t<head>\n"
+        code += "\t\t<title>" + title + "</title>\n"
+        code += "\t\t<link rel=\"stylesheet\" href=\"../style.css\">\n"
+        code += "\t<head>\n\t<body>\n"
+        code += self.nav_menu()
+        code += "\t\t\t<tr>\n"
+        code += "\t\t\t\t<td><img src=\""
+        code += self.image_filepath
+        code += "\" /></td>\n"
+        code += "\t\t\t</tr>\n"
         code += "\t\t</table>\n"
+        code += self.nav_menu()
+        code += "\t</body>\n"
         code += "</html>"
         code = code.replace(self.image_filepath, title)
 
@@ -107,33 +111,20 @@ class IMAGE:
 
     def generate_index_html(self):
         name = self.image_filepath.split('/')[-1]
+        results = "<a href=\"" + self.webpage_filepath + "\">"
+        results += "<img src=\"" + self.thumbnail_filepath + "\" /></a><br />"
+        results += name + "<br />"
         if '/' in str(self.exif['EXIF ExposureTime']):
-            return "<a href=\"" \
-                    + self.webpage_filepath \
-                    + "\"><img src=\"" \
-                    + self.thumbnail_filepath \
-                    + "\" class=\"tumbnail\" /></a><br />" \
-                    + name \
-                    + "<br />" \
-                    + str(self.exif['EXIF ExposureTime']) \
-                    + " second<br />ISO " \
-                    + str(self.exif['EXIF RecommendedExposureIndex']) \
-                    + "<br />" \
-                    + str(self.exif['EXIF FocalLength']) \
-                    + "mm"
+            results += str(self.exif['EXIF ExposureTime']) \
+            + " second<br />ISO "
         else:
-            return "<a href=\"" \
-                    + self.webpage_filepath \
-                    + "\"><img src=\"" \
-                    + self.thumbnail_filepath \
-                    + "\" class=\"tumbnail\" /></a><br />" \
-                    + name + "<br />" \
-                    + str(self.exif['EXIF ExposureTime']) \
-                    + " seconds<br />ISO " \
-                    + str(self.exif['EXIF RecommendedExposureIndex']) \
-                    + "<br />" \
-                    + str(self.exif['EXIF FocalLength']) \
-                    + "mm"
+            results += str(self.exif['EXIF ExposureTime']) \
+            + " seconds<br />ISO "
+        results += str(self.exif['EXIF RecommendedExposureIndex'])
+        results += "<br />"
+        results += str(self.exif['EXIF FocalLength'])
+        results += "mm"
+        return results
 
 
 def arguments():
@@ -159,6 +150,12 @@ def logme(args, message):
 def alert(args, message):
     if args.verbose:
         print(message)
+
+
+def write_to_file(filepath, data):
+    output = open(filepath, "w")
+    output.write(data)
+    output.close()
 
 
 def main():
@@ -242,13 +239,8 @@ def main():
     css += "td.bottom_description\n{\n\tvertical-align:bottom;\n}\n\n"
     css += "img\n{\n\tmax-height:1024;\n\theight:auto;\n}"
 
-    output = open(args.filepath + "index.html", "w")
-    output.write(index)
-    output.close()
-
-    output = open(args.filepath + "style.css", "w")
-    output.write(css)
-    output.close()
+    write_to_file(args.filepath + "index.html", index)
+    write_to_file(args.filepath + "style.css", css)
 
 
 if __name__ == "__main__":
