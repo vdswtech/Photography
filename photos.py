@@ -200,8 +200,6 @@ def main():
             index += "</td>\n"
             if count == 5:
                 index += "\t\t\t</tr>\n"
-                index += "\t\t\t<br />\n"
-                index += "\t\t\t<br />\n"
                 index += "\t\t\t<tr>\n"
                 count = 0
             else:
