@@ -49,9 +49,7 @@ class IMAGE:
         img = open(self.image_filepath, 'rb')
         tags = exifread.process_file(img)
         for tag in tags.keys():
-            if tag in ('EXIF ExposureTime',
-                       'EXIF FocalLength',
-                       'EXIF RecommendedExposureIndex'):
+            if tag in ('EXIF ExposureTime', 'EXIF FocalLength', 'EXIF RecommendedExposureIndex'):
                 self.exif[tag] = tags[tag]
 
     def get_img_path(self):
@@ -69,17 +67,13 @@ class IMAGE:
         if self.previous_img is None:
             code += "\t\t\t\t<td align=\"center\">PREV</td>\n"
         else:
-            code += "\t\t\t\t<td align=\"center\"><a href=\""
-            code += self.previous_img
-            code += "\">PREV</a></td>\n"
+            code += "\t\t\t\t<td align=\"center\"><a href=\"" + self.previous_img + "\">PREV</a></td>\n"
         code += "\t\t\t\t<td align=\"center\">"
         code += "<a href=\"../index.html\">Home</a></td>\n"
         if self.next_img is None:
             code += "\t\t\t\t<td align=\"center\">NEXT</td>\n"
         else:
-            code += "\t\t\t\t<td align=\"center\"><a href=\""
-            code += self.next_img
-            code += "\">NEXT</a></td>\n"
+            code += "\t\t\t\t<td align=\"center\"><a href=\"" + self.next_img + "\">NEXT</a></td>\n"
         code += "\t\t\t</tr>\n"
         code += "\t\t<table>\n"
 
@@ -94,9 +88,7 @@ class IMAGE:
         code += "\t<head>\n\t<body>\n"
         code += self.nav_menu()
         code += "\t\t\t<tr>\n"
-        code += "\t\t\t\t<td><img src=\""
-        code += self.image_filepath
-        code += "\" /></td>\n"
+        code += "\t\t\t\t<td><img src=\"" + self.image_filepath + "\" /></td>\n"
         code += "\t\t\t</tr>\n"
         code += "\t\t</table>\n"
         code += self.nav_menu()
@@ -114,12 +106,10 @@ class IMAGE:
         results += "<img src=\"" + self.thumbnail_filepath + "\" /></a><br />"
         results += name + "<br />"
         if '/' in str(self.exif['EXIF ExposureTime']):
-            results += str(self.exif['EXIF ExposureTime']) \
-            + " second<br />ISO "
+            results += str(self.exif['EXIF ExposureTime']) + " second<br />"
         else:
-            results += str(self.exif['EXIF ExposureTime']) \
-            + " seconds<br />ISO "
-        results += str(self.exif['EXIF RecommendedExposureIndex'])
+            results += str(self.exif['EXIF ExposureTime']) + " seconds<br />"
+        results += "ISO " + str(self.exif['EXIF RecommendedExposureIndex'])
         results += "<br />"
         results += str(self.exif['EXIF FocalLength'])
         results += "mm"
@@ -129,8 +119,7 @@ class IMAGE:
 def arguments():
     parser = argparse.ArgumentParser(prog='photos')
 
-    parser.add_argument('filepath',
-                        help='Specify the location of the photos')
+    parser.add_argument('filepath', help='Specify the location of the photos')
 
     return parser.parse_args()
 
@@ -141,39 +130,20 @@ def write_to_file(filepath, data):
     output.close()
 
 
-def main():
-    images = {}
-    args = arguments()
+def generate_css(args):
+    css = "td.top_description\n{\n\tvertical-align:top;\n}\n\n"
+    css += "td.bottom_description\n{\n\tvertical-align:bottom;\n}\n\n"
+    css += "img\n{\n\tmax-height:1024;\n\theight:auto;\n}"
 
-    for entries in sorted(os.listdir(args.filepath)):
-        arr = []
-        if not re.search('css', entries) \
-                and not re.search('js', entries) \
-                and not re.search('html', entries):
-            for image in sorted(os.listdir(args.filepath + entries)):
-                if re.search('IMG_[0-9]{4}.jpg', image):
-                    main = args.filepath + entries + "/" + image
-                    thumb = args.filepath
-                    thumb += entries
-                    thumb += "/"
-                    thumb += image.split('.')[0]
-                    thumb += "_thumb."
-                    thumb += main.split('.')[1]
-                    web = args.filepath
-                    web += entries
-                    web += "/" + image.split('.')[0]
-                    web += ".html"
-                    img = IMAGE(main, thumb, web)
-                    arr.append(img)
-                    images[entries] = arr
+    write_to_file(args.filepath + "style.css", css)
 
+
+def generate_index(args, images):
     index = "<!DOCTYPE html>\n"
-    index += "<html>\n"
-    index += "\t<head>\n"
+    index += "<html>\n\t<head>\n"
     index += "\t\t<title>Victoria Wolter photography</title>\n"
     index += "\t\t<link rel=\"stylesheet\" href=\"style.css\" />\n"
-    index += "\t</head>\n"
-    index += "\t<body>\n"
+    index += "\t</head>\n\t<body>\n"
 
     for image in images:
         count = 0
@@ -185,15 +155,13 @@ def main():
             if element == 0:
                 images[image][element].set_previous(None)
             else:
-                images[image][element].set_previous(images[image][element-1]
-                                                    .get_img_path()
-                                                    .split('/')[-1])
+                images[image][element].set_previous(images[image][element-1].get_img_path().split('/')[-1])
+
             if element == len(images[image])-1:
                 images[image][element].set_next(None)
             else:
-                images[image][element].set_next(images[image][element+1]
-                                                .get_img_path()
-                                                .split('/')[-1])
+                images[image][element].set_next(images[image][element+1].get_img_path().split('/')[-1])
+
             images[image][element].generate_html()
             index += "\t\t\t<td class=\"bottom_description\">"
             index += images[image][element].generate_index_html()
@@ -209,12 +177,26 @@ def main():
     index += "\t</body>\n</html>"
     index = index.replace(args.filepath, '')
 
-    css = "td.top_description\n{\n\tvertical-align:top;\n}\n\n"
-    css += "td.bottom_description\n{\n\tvertical-align:bottom;\n}\n\n"
-    css += "img\n{\n\tmax-height:1024;\n\theight:auto;\n}"
-
     write_to_file(args.filepath + "index.html", index)
-    write_to_file(args.filepath + "style.css", css)
+
+
+def main():
+    images = {}
+    args = arguments()
+
+    for entries in sorted(os.listdir(args.filepath)):
+        arr = []
+        if not re.search('css', entries) and not re.search('js', entries) and not re.search('html', entries):
+            for image in sorted(os.listdir(args.filepath + entries)):
+                if re.search('IMG_[0-9]{4}.jpg', image):
+                    main = args.filepath + entries + "/" + image
+                    thumb = args.filepath + entries + "/" + image.split('.')[0] + "_thumb." +  main.split('.')[1]
+                    web = args.filepath + entries + "/" + image.split('.')[0] + ".html"
+                    arr.append(IMAGE(main, thumb, web))
+                    images[entries] = arr
+
+    generate_index(args, images)
+    generate_css(args)
 
 
 if __name__ == "__main__":
